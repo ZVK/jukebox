@@ -22,20 +22,20 @@ MODELS = {
 }
 
 def load_checkpoint(path):
-    restore = path
-    if restore[:5] == 'gs://':
-        gs_path = restore
+    _restore = path
+    if _restore[:5] == 'gs://':
+        gs_path = _restore
         local_path = os.path.join(os.path.expanduser("~/.cache"), gs_path[5:])
         if dist.get_rank() % 8 == 0:
-            print("Downloading from gce")
             if not os.path.exists(os.path.dirname(local_path)):
                 os.makedirs(os.path.dirname(local_path))
             if not os.path.exists(local_path):
+                print("Downloading from gce")
                 download(gs_path, local_path)
-        restore = local_path
+        _restore = local_path
     dist.barrier()
-    checkpoint = t.load(restore, map_location=t.device('cpu'))
-    print("Restored from {}".format(restore))
+    checkpoint = t.load(_restore, map_location=t.device('cpu'))
+    print("Restored from {}".format(_restore))
     return checkpoint
 
 def save_checkpoint(logdir, name, model, opt, metrics, hps):
