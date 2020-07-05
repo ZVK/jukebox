@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import torch as t
 
 from jukebox.hparams import Hyperparams
@@ -12,8 +11,9 @@ from jukebox.utils.sample_utils import split_batch, get_starts
 from jukebox.utils.dist_utils import print_once
 import fire
 
-# Sample a partial window of length<n_ctx with tokens_to_sample new tokens on level=level
+
 def sample_partial_window(zs, labels, sampling_kwargs, level, prior, tokens_to_sample, hps):
+    """Sample a partial window of length<n_ctx with tokens_to_sample new tokens on level=level"""
     z = zs[level]
     n_ctx = prior.n_ctx
     current_tokens = z.shape[1]
@@ -26,8 +26,9 @@ def sample_partial_window(zs, labels, sampling_kwargs, level, prior, tokens_to_s
 
     return sample_single_window(zs, labels, sampling_kwargs, level, prior, start, hps)
 
-# Sample a single window of length=n_ctx at position=start on level=level
+
 def sample_single_window(zs, labels, sampling_kwargs, level, prior, start, hps):
+    """Sample a single window of length=n_ctx at position=start on level=level"""
     n_samples = hps.n_samples
     n_ctx = prior.n_ctx
     end = start + n_ctx
@@ -76,8 +77,9 @@ def sample_single_window(zs, labels, sampling_kwargs, level, prior, start, hps):
     zs[level] = t.cat([zs[level], z_new], dim=1)
     return zs
 
-# Sample total_length tokens at level=level with hop_length=hop_length
+
 def sample_level(zs, labels, sampling_kwargs, level, prior, total_length, hop_length, hps):
+    """Sample total_length tokens at level=level with hop_length=hop_length"""
     print_once(f"Sampling level {level}")
     if total_length >= prior.n_ctx:
         for start in get_starts(total_length, prior.n_ctx, hop_length):
@@ -86,8 +88,9 @@ def sample_level(zs, labels, sampling_kwargs, level, prior, total_length, hop_le
         zs = sample_partial_window(zs, labels, sampling_kwargs, level, prior, total_length, hps)
     return zs
 
-# Sample multiple levels
+
 def _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps):
+    """Sample multiple levels"""
     alignments = None
     for level in reversed(sample_levels):
         prior = priors[level]
@@ -116,28 +119,32 @@ def _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps):
         save_html(logdir, x, zs, labels[-1], alignments, hps)
     return zs
 
-# Generate ancestral samples given a list of artists and genres
+
 def ancestral_sample(labels, sampling_kwargs, priors, hps):
+    """Generate ancestral samples given a list of artists and genres"""
     sample_levels = list(range(len(priors)))
     zs = [t.zeros(hps.n_samples,0,dtype=t.long, device='cuda') for _ in range(len(priors))]
     zs = _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps)
     return zs
 
-# Upsample given already generated upper-level codes
+
 def upsample(zs, labels, sampling_kwargs, priors, hps):
+    """Upsample given already generated upper-level codes"""
     sample_levels = list(range(len(priors) - 1))
     zs = _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps)
     return zs
 
-# Prompt the model with raw audio input (dimension: NTC) and generate continuations
+
 def primed_sample(x, labels, sampling_kwargs, priors, hps):
+    """Prompt the model with raw audio input (dimension: NTC) and generate continuations"""
     sample_levels = list(range(len(priors)))
     zs = priors[-1].encode(x, start_level=0, end_level=len(priors), bs_chunks=x.shape[0])
     zs = _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps)
     return zs
 
-# Load `duration` seconds of the given audio files to use as prompts
+
 def load_prompts(audio_files, duration, hps):
+    """Load `duration` seconds of the given audio files to use as prompts"""
     xs = []
     for audio_file in audio_files:
         x = load_audio(audio_file, sr=hps.sr, duration=duration, offset=0.0, mono=True)
@@ -150,8 +157,9 @@ def load_prompts(audio_files, duration, hps):
     x = x.to('cuda', non_blocking=True)
     return x
 
-# Generate and save samples, alignment, and webpage for visualization.
+
 def save_samples(model, device, hps, sample_hps):
+    """Generate and save samples, alignment, and webpage for visualization."""
     print(hps)
     from jukebox.lyricdict import poems, gpt_2_lyrics
     vqvae, priors = make_model(model, device, hps)
