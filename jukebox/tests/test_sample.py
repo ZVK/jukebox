@@ -1,6 +1,6 @@
 import torch as t
 import numpy as np
-from jukebox.sample import sample_level
+from jukebox.sample_openai import sample_level
 from jukebox.utils.torch_utils import assert_shape
 from jukebox.hparams import Hyperparams
 
