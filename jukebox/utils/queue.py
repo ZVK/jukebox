@@ -21,7 +21,7 @@ def connectdb(host: str,
 
 def closedb(db):
     """close the db connection"""
-    print("commiting DB just in case i forgot..")
+    print("committing DB just in case i forgot..")
     try:
         db.commit()
     except:
