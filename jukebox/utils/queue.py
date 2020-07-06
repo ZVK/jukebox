@@ -1,22 +1,35 @@
 import pymysql
 import json
+import os
 
-
-def connectdb(host: str,
-              user: str,
-              password: str,
-              db: str,
-              autocommit: bool = True):
-    """connect to the db"""
-    print("connecting to database..")
-    db = pymysql.connect(host=host,  # your host, usually localhost
-                         user=user,  # your username
-                         passwd=password,  # your password
-                         db=db,  # name of the data base
-                         autocommit=autocommit)
-    cur = db.cursor()
-    print("successfully connected..")
-    return db, cur
+def connectdb(autocommit: bool = True):
+    """connect to the db using pymysql
+    args:
+        autocommit: bool
+            arg for pymysql.connect
+    returns
+        db: obj
+            pymysql database object
+        cur: obj
+            cursor object
+    raises:
+        FileNotFoundError: depends on ~/jbq_credentials.json
+    """
+    with open(os.path.expanduser('jbq_credentials.json')) as f:
+        credentials = json.load(f)
+    if credentials:
+        print("connecting to database..\n", credentials)
+        db = pymysql.connect(host=credentials['host'],  # your host
+                             user=credentials['user'],  # your username
+                             passwd=credentials['password'],  # your password
+                             db=credentials['db'],  # name of the database
+                             autocommit=autocommit)
+        cur = db.cursor()
+        print("successfully connected..")
+        return db, cur
+    else:
+        print("could not read ~/jbq_credentials.json")
+        raise FileNotFoundError
 
 
 def closedb(db):
