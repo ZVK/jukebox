@@ -158,47 +158,16 @@ def load_prompts(audio_files, duration, hps):
     return x
 
 
-def save_samples(model, device, hps, sample_hps):
+def save_samples(model, device, hps, sample_hps, metas: list):
     """Generate and save samples, alignment, and webpage for visualization."""
     print(hps)
     from jukebox.lyricdict import poems, gpt_2_lyrics
     vqvae, priors = make_model(model, device, hps)
 
     assert hps.sample_length//priors[-2].raw_to_tokens >= priors[-2].n_ctx, f"Upsampling needs atleast one ctx in get_z_conds. Please choose a longer sample length"
-
+    assert isinstance(metas, list)
     total_length = hps.total_sample_length_in_seconds * hps.sr
     offset = 0
-    metas = [dict(artist = "Alan Jackson",
-                  genre = "Country",
-                  lyrics = poems['ozymandias'],
-                  total_length=total_length,
-                  offset=offset,
-                  ),
-             dict(artist="Joe Bonamassa",
-                  genre="Blues Rock",
-                  lyrics=gpt_2_lyrics['hottub'],
-                  total_length=total_length,
-                  offset=offset,
-                  ),
-             dict(artist="Frank Sinatra",
-                  genre="Classic Pop",
-                  lyrics=gpt_2_lyrics['alone'],
-                  total_length=total_length,
-                  offset=offset,
-                  ),
-             dict(artist="Ella Fitzgerald",
-                  genre="Jazz",
-                  lyrics=gpt_2_lyrics['count'],
-                  total_length=total_length,
-                  offset=offset,
-                  ),
-             dict(artist="Celine Dion",
-                  genre="Pop",
-                  lyrics=gpt_2_lyrics['darkness'],
-                  total_length=total_length,
-                  offset=offset,
-                  ),
-             ]
     while len(metas) < hps.n_samples:
         metas.extend(metas)
     metas = metas[:hps.n_samples]
@@ -234,12 +203,36 @@ def save_samples(model, device, hps, sample_hps):
 
 def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500, **kwargs):
     from jukebox.utils.dist_utils import setup_dist_from_mpi
+    from jukebox.utils import queue
+    # setup distributed communications
     rank, local_rank, device = setup_dist_from_mpi(port=port)
-    hps = Hyperparams(**kwargs)
-    sample_hps = Hyperparams(dict(mode=mode, audio_file=audio_file, prompt_length_in_seconds=prompt_length_in_seconds))
-
-    with t.no_grad():
-        save_samples(model, device, hps, sample_hps)
+    # connect to db
+    db, cur = queue.connectdb()
+    while True:
+        # get the next job
+        job = queue.get_next_job()
+        if job:
+            print(job)
+            job_id = job['job_id']
+            metas = Hyperparams(job.params)
+            hps = Hyperparams(**kwargs)
+            sample_hps = Hyperparams(dict(mode=mode,
+                                          audio_file=audio_file,
+                                          prompt_length_in_seconds=prompt_length_in_seconds))
+            # Lock the job
+            queue.lock(cur, job_id)
+            # Start the job
+            queue.update_status(cur, job_id, "top_started")
+            # Log the URL
+            queue.log(cur, job_id, "URL: http://123.42.12.12/jukebox/queen13/")
+            # Run the full generating script here
+            with t.no_grad():
+                save_samples(model, device, hps, sample_hps, metas)
+            # FINISH
+            queue.update_status(cur, job_id, "upsampling_done")
+        else:
+            # break the loop
+            break
 
 if __name__ == '__main__':
     fire.Fire(run)
