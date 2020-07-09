@@ -210,7 +210,7 @@ def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0,
     db, cur = queue.connectdb()
     while True:
         # get the next job
-        job = queue.get_next_job()
+        job = queue.get_next_job(cur)
         if job:
             print(job)
             job_id = job['job_id']
