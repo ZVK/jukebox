@@ -53,7 +53,6 @@ def closedb(db):
 def validate_params(params):
     """assert that json contains all required params"""
     keys = params.keys()
-    print(keys)
     result = True
     if not "artist" in keys:
         print('An artist must be provided')
