@@ -54,16 +54,20 @@ def validate_params(params):
     """assert that json contains all required params"""
     keys = params.keys()
     print(keys)
-    try:
-        if not params["artist"] in keys:
-            print('An artist must be provided')
-        if not params["genre"] in keys:
-            print('A Genre must be provided')
-        if not params["lyrics"] in keys:
-            print('Lyrics must be provided')
-        return True
-    except AssertionError:
-        return False
+    result = True
+    if not "artist" in keys:
+        print('An artist must be provided')
+        result = False
+    if not "genre" in keys:
+        print('A Genre must be provided')
+        result = False
+    if not "lyrics" in keys:
+        print('Lyrics must be provided')
+        result = False
+    if not 'model' in keys:
+        print("Model must be provided")
+        result = False
+    return result
 
 
 def parse_params(row):
