@@ -214,7 +214,7 @@ def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0,
         if job:
             print(job)
             job_id = job['job_id']
-            metas = Hyperparams(job.params)
+            metas = Hyperparams(job['params'])
             hps = Hyperparams(**kwargs)
             sample_hps = Hyperparams(dict(mode=mode,
                                           audio_file=audio_file,
