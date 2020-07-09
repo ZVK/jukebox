@@ -25,7 +25,8 @@ def load_checkpoint(path):
     _restore = path
     if _restore[:5] == 'gs://':
         gs_path = _restore
-        local_path = os.path.join(os.path.expanduser("~/.cache"), gs_path[5:])
+        cache = "~/data/.cache" if os.path.exists(os.path.expanduser('/data')) else "~/.cache"
+        local_path = os.path.join(os.path.expanduser(cache), gs_path[5:])
         if dist.get_rank() % 8 == 0:
             if not os.path.exists(os.path.dirname(local_path)):
                 os.makedirs(os.path.dirname(local_path))
