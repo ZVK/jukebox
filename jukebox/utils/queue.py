@@ -15,7 +15,7 @@ def connectdb(autocommit: bool = True):
     raises:
         FileNotFoundError: depends on ~/jbq_credentials.json
     """
-    with open(os.path.expanduser('jbq_credentials.json')) as f:
+    with open(os.path.expanduser('~/jbq_credentials.json')) as f:
         credentials = json.load(f)
     if credentials:
         print("connecting to database..\n", credentials)
