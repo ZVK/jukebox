@@ -53,10 +53,14 @@ def closedb(db):
 def validate_params(params):
     """assert that json contains all required params"""
     keys = params.keys()
+    print(keys)
     try:
-        assert params["artist"] in keys, 'An artist must be provided'
-        assert params["genre"] in keys, 'A Genre must be provided'
-        assert params["lyrics"] in keys, 'Lyrics must be provided'
+        if not params["artist"] in keys:
+            print('An artist must be provided')
+        if not params["genre"] in keys:
+            print('A Genre must be provided')
+        if not params["lyrics"] in keys:
+            print('Lyrics must be provided')
         return True
     except AssertionError:
         return False
