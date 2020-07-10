@@ -55,17 +55,21 @@ def validate_params(params):
     keys = params.keys()
     result = True
     if not "artist" in keys:
-        print('An artist must be provided')
+        print('An artist must be provided in jobs_jukebox job params')
         result = False
     if not "genre" in keys:
-        print('A Genre must be provided')
+        print('A genre must be provided in jobs_jukebox job params')
         result = False
     if not "lyrics" in keys:
-        print('Lyrics must be provided')
+        print('Lyrics must be provided in jobs_jukebox job params')
         result = False
     if not 'model' in keys:
-        print("Model must be provided")
+        print('A trained model name must be provided in jobs_jukebox job params')
         result = False
+    if not 'name' in keys:
+        print('An experiment name must be provided in jobs_jukebox job params')
+    if not 'length':  # sample length in seconds
+        print('A sample length in seconds must be provided in jobs_jukebox job params')
     return result
 
 
@@ -75,6 +79,7 @@ def parse_params(row):
     row["params"] = json.loads(row["params"])
     # assert the json is in right format
     assert validate_params(row["params"]), "The JSON format is not valid"
+    return row
 
 
 def get_next_job(cur, status="top_ready"):
@@ -89,7 +94,7 @@ def get_next_job(cur, status="top_ready"):
         print("no jobs available")
         return None
     row = dict(zip(fields, rows))
-    parse_params(row)
+    row = parse_params(row)
     return row
 
 
