@@ -68,8 +68,10 @@ def validate_params(params):
         result = False
     if not 'name' in keys:
         print('An experiment name must be provided in jobs_jukebox job params')
+        result = False
     if not 'length':  # sample length in seconds
         print('A sample length in seconds must be provided in jobs_jukebox job params')
+        result = False
     return result
 
 
