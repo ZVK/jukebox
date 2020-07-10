@@ -235,7 +235,9 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             # Log the URL
             curl = subprocess.Popen(os.path.expanduser('./get_ip.sh'), stdout=subprocess.PIPE)
             ip, _ = curl.communicate()  # (ip, error)
-            queue.log(cur, job_id, "URL: http://{}/jukebox/{}/".format(ip, job['params']['name']))
+            queue.log(cur,
+                      job_id,
+                      "URL: http://{}/jukebox/{}{}/".format(ip.encode().strip(), job_id, job['params']['name']))
             # Run the full generating script here
             with t.no_grad():
                 save_samples(job['params']['model'], device, hps, sample_hps, [metas])
