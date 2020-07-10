@@ -231,7 +231,8 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             # Start the job
             queue.update_status(cur, job_id, "top_started")
             # Log the URL
-            ip = subprocess.call(os.path.expanduser('./get_ip.sh'))
+            curl = subprocess.Popen(os.path.expanduser('./get_ip.sh'), stdout=subprocess.PIPE)
+            ip, _ = curl.communicate()  # (ip, error)
             queue.log(cur, job_id, "URL: http://{}/jukebox/{}/".format(ip, job['params']['name']))
             # Run the full generating script here
             with t.no_grad():
