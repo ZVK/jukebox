@@ -219,8 +219,10 @@ def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0,
             metas = Hyperparams(dict(artist=job['params']['artist'],
                                      genre=job['params']['genre'],
                                      lyrics=job['params']['lyrics']))
-            print(dict(**kwargs))
-            hps = Hyperparams(dict(**kwargs))
+            kw = dict(**kwargs)
+            kw['sample_length_in_seconds'] = kw['total_sample_length_in_seconds'] = job['params']['length']
+            kw['num_samples'] = 3 if '5b' in job['params']['model'] else 16
+            hps = Hyperparams()
             sample_hps = Hyperparams(dict(mode=mode,
                                           audio_file=audio_file,
                                           prompt_length_in_seconds=prompt_length_in_seconds))
