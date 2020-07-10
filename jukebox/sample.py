@@ -202,7 +202,7 @@ def save_samples(model, device, hps, sample_hps, metas: list):
         raise ValueError(f'Unknown sample mode {sample_hps.mode}.')
 
 
-def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500, **kwargs):
+def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500, **kwargs):
     from jukebox.utils.dist_utils import setup_dist_from_mpi
     from jukebox.utils import queue
     # setup distributed communications
