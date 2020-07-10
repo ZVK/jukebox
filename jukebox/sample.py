@@ -220,7 +220,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             metas = Hyperparams(dict(artist=job['params']['artist'],
                                      genre=job['params']['genre'],
                                      lyrics=job['params']['lyrics'],
-                                     total_length=job['params']['length'],
+                                     total_length=job['params']['length']*44100,  # remove hardcoded sr
                                      offset=offset))
             kw = dict(**kwargs)
             kw['sample_length_in_seconds'] = int(job['params']['length'])
