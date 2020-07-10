@@ -209,6 +209,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
     rank, local_rank, device = setup_dist_from_mpi(port=port)
     # connect to db
     db, cur = queue.connectdb()
+    offset = 0
     while True:
         # get the next job
         job = queue.get_next_job(cur)
@@ -218,10 +219,12 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             # artist, lyrics, genre
             metas = Hyperparams(dict(artist=job['params']['artist'],
                                      genre=job['params']['genre'],
-                                     lyrics=job['params']['lyrics']))
+                                     lyrics=job['params']['lyrics'],
+                                     total_length=job['params']['length'],
+                                     offset=offset))
             kw = dict(**kwargs)
-            kw['sample_length_in_seconds'] = int(job['params']['length'])
-            kw['total_sample_length_in_seconds'] = int(job['params']['length'])
+            kw['sample_length_in_seconds'] = int(job['params']['total_length'])
+            kw['total_sample_length_in_seconds'] = int(job['params']['total_length'])
             kw['n_samples'] = 3 if '5b' in job['params']['model'] else 16
             hps = Hyperparams(kw)
             print(hps)
