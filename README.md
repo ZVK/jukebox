@@ -59,6 +59,7 @@ The python module `utils.queue` expects a table named `jobs_jukebox` with the fo
 - `date_modified` DATETIME
 - `date_done` DATETIME
 
+This [SQL code](https://github.com/ZVK/jukebox/blob/master/jukebox/data/create_table_jobs_jukebox.sql) can be used to create the table:
 
 
 # Sampling
