@@ -1,11 +1,17 @@
-**Status:** Archive (code is provided as-is, no updates expected)
-
-# Jukebox
+# Jukebox (Dadabots fork)
 Code for "Jukebox: A Generative Model for Music"
 
 [Paper](https://cdn.openai.com/papers/jukebox.pdf) 
+
 [Blog](https://openai.com/blog/jukebox) 
+
 [Explorer](http://jukebox.openai.com/) 
+
+
+## Dadabots contributions
+- `utils.queue` new module for mysql database interactions (job queue)
+- `utils.lyric_align` lyric alignment scores (lyric correctness metrics)
+- `sample.py` improved sample interface using jobs database and new modules
 
 # Install
 ``` 
@@ -27,6 +33,33 @@ pip install ./tensorboardX
 conda install pytorch=1.1 torchvision=0.3 cudatoolkit=10.0 -c pytorch
 pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./apex
 ```
+# MySQL Setup
+Download and create a [MySQL Database](https://www.mysql.com)
+
+
+Create a new json config file to give Jukebox access to the DB
+```
+vim ~/jbq_credentials.json
+```
+Then add the following line with your own credentials and save the file
+```
+{"host": "mydb.myhost.com", "user": "db_user", "password": "foobar123", "db": "db_name"}
+```
+
+The python module `utils.queue` expects a table named `jobs_jukebox` with the following structure:
+
+
+- `job_id` INT
+- `name` TEXT
+- `locked` TINYINT
+- `status` TEXT
+- `params` TEXT
+- `log` TEXT
+- `date_created` DATETIME
+- `date_modified` DATETIME
+- `date_done` DATETIME
+
+
 
 # Sampling
 To sample normally, run the following command. Model can be `5b`, `5b_lyrics`, `1b_lyrics`
