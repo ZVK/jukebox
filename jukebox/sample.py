@@ -223,8 +223,8 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
                                      total_length=job['params']['length'],
                                      offset=offset))
             kw = dict(**kwargs)
-            kw['sample_length_in_seconds'] = int(job['params']['total_length'])
-            kw['total_sample_length_in_seconds'] = int(job['params']['total_length'])
+            kw['sample_length_in_seconds'] = int(job['params']['length'])
+            kw['total_sample_length_in_seconds'] = int(job['params']['length'])
             kw['n_samples'] = 3 if '5b' in job['params']['model'] else 16
             hps = Hyperparams(kw)
             print(hps)
