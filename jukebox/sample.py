@@ -214,8 +214,12 @@ def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0,
         if job:
             print(job)
             job_id = job['job_id']
-            metas = Hyperparams(job['params'])
-            hps = Hyperparams(**kwargs)
+            # artist, lyrics, genre
+            metas = Hyperparams(dict(artist=job['params']['artist'],
+                                     genre=job['params']['genre'],
+                                     lyrics=job['params']['lyrics']))
+            print(dict(**kwargs))
+            hps = Hyperparams(dict(**kwargs))
             sample_hps = Hyperparams(dict(mode=mode,
                                           audio_file=audio_file,
                                           prompt_length_in_seconds=prompt_length_in_seconds))
@@ -224,7 +228,8 @@ def run(model, mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0,
             # Start the job
             queue.update_status(cur, job_id, "top_started")
             # Log the URL
-            queue.log(cur, job_id, "URL: http://123.42.12.12/jukebox/queen13/")
+            ip = subprocess.call(os.path.expanduser('./get_ip.sh'))
+            queue.log(cur, job_id, "URL: http://{}/jukebox/{}/".format(ip, job['params']['name']))
             # Run the full generating script here
             with t.no_grad():
                 save_samples(model, device, hps, sample_hps, [metas])
