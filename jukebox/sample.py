@@ -235,7 +235,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             queue.log(cur, job_id, "URL: http://{}/jukebox/{}/".format(ip, job['params']['name']))
             # Run the full generating script here
             with t.no_grad():
-                save_samples(model, device, hps, sample_hps, [metas])
+                save_samples(job['params']['model'], device, hps, sample_hps, [metas])
             # FINISH
             queue.update_status(cur, job_id, "upsampling_done")
         else:
