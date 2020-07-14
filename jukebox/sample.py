@@ -109,8 +109,7 @@ def _sample(zs, labels, sampling_kwargs, priors, sample_levels, hps):
 
         # Decode sample
         x = priors[-1].decode(zs[level:], start_level=level, bs_chunks=zs[level].shape[0])
-
-        logdir = f"{hps.name}/level_{level}"
+        logdir = f"{hps.job_id}_{hps.name}/level_{level}"
         if not os.path.exists(logdir):
             os.makedirs(logdir)
         t.save(dict(zs=zs, labels=labels, sampling_kwargs=sampling_kwargs, x=x), f"{logdir}/data.pth.tar")
@@ -226,6 +225,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             kw['sample_length_in_seconds'] = int(job['params']['length'])
             kw['total_sample_length_in_seconds'] = int(job['params']['length'])
             kw['n_samples'] = 3 if '5b_lyrics' == job['params']['model'] else 16
+            kw['job_id'] = job_id
             hps = Hyperparams(kw)
             print(hps)
             sample_hps = Hyperparams(dict(mode=mode,
@@ -238,6 +238,8 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             # Log the URL
             curl = subprocess.Popen(os.path.expanduser('./get_ip.sh'), stdout=subprocess.PIPE)
             ip, _ = curl.communicate()  # (ip, error)
+            url = "http://{}/jukebox/{}{}/".format(ip.decode().strip(), job_id, job['params']['name'])
+
             queue.log(cur,
                       job_id,
                       "URL: http://{}/jukebox/{}{}/".format(ip.decode().strip(), job_id, job['params']['name']))
