@@ -227,6 +227,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             kw['total_sample_length_in_seconds'] = int(job['params']['length'])
             kw['n_samples'] = 3 if '5b_lyrics' == job['params']['model'] else 16
             kw['job_id'] = job_id
+            kw['name'] = job['params']['name']
             hps = Hyperparams(kw)
             print(hps)
             sample_hps = Hyperparams(dict(mode=mode,
