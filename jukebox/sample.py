@@ -212,6 +212,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
         offset = 0
         # get the next job
         job = queue.get_next_job(cur)
+        queue.closedb(db)
         if job:
             print(job)
             job_id = job['job_id']
@@ -247,7 +248,9 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             with t.no_grad():
                 save_samples(job['params']['model'], device, hps, sample_hps, [metas])
             # FINISH
+            db, cur = queue.connectdb()
             queue.update_status(cur, job_id, "upsampling_done")
+            queue.closedb(db)
         else:
             # break the loop
             break
