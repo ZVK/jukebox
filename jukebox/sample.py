@@ -212,7 +212,6 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
         offset = 0
         # get the next job
         job = queue.get_next_job(cur)
-        queue.closedb(db)
         if job:
             print(job)
             job_id = job['job_id']
@@ -245,11 +244,15 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             queue.log(cur,
                       job_id,
                       "URL: http://{}/jukebox/{}{}/".format(ip.decode().strip(), job_id, job['params']['name']))
+            # close db connection to avoid timeout error after sampling
+            queue.closedb(db)
             # Run the full generating script here
             with t.no_grad():
                 save_samples(job['params']['model'], device, hps, sample_hps, [metas])
             # FINISH
+            # open fresh db connection
             db, cur = queue.connectdb()
+            # update status
             queue.update_status(cur, job_id, "upsampling_done")
             queue.closedb(db)
         else:
