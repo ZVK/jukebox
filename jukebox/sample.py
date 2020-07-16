@@ -204,9 +204,9 @@ def save_samples(model, device, hps, sample_hps, metas: list):
 def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500, **kwargs):
     from jukebox.utils.dist_utils import setup_dist_from_mpi
     from jukebox.utils import queue
+    # setup distributed communications
+    rank, local_rank, device = setup_dist_from_mpi(port=port)
     while True:
-        # setup distributed communications
-        rank, local_rank, device = setup_dist_from_mpi(port=port)
         # connect to db
         db, cur = queue.connectdb()
         offset = 0
