@@ -1,4 +1,5 @@
 import os
+import time
 import subprocess
 import torch as t
 
@@ -201,7 +202,7 @@ def save_samples(model, device, hps, sample_hps, metas: list):
         raise ValueError(f'Unknown sample mode {sample_hps.mode}.')
 
 
-def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500, **kwargs):
+def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=29500):
     from jukebox.utils.dist_utils import setup_dist_from_mpi
     from jukebox.utils import queue
     # setup distributed communications
@@ -215,19 +216,23 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
         if job:
             print(job)
             job_id = job['job_id']
-            # artist, lyrics, genre
-            metas = Hyperparams(dict(artist=job['params']['artist'],
-                                     genre=job['params']['genre'],
-                                     lyrics=job['params']['lyrics'],
-                                     total_length=job['params']['length']*44100,  # remove hardcoded sr
-                                     offset=offset))
-            kw = dict(**kwargs)
+            kw = dict()
+            kw['sr'] = 44100
+            kw['n_samples'] = 3
+            kw['hop_fraction'] = (0.5, 0.5, 0.25)
+            kw['model'] = '5b_lyrics'
             kw['sample_length_in_seconds'] = int(job['params']['length'])
             kw['total_sample_length_in_seconds'] = int(job['params']['length'])
             kw['n_samples'] = 3 if '5b_lyrics' == job['params']['model'] else 16
             kw['job_id'] = job_id
             kw['name'] = job['params']['name']
             hps = Hyperparams(kw)
+            # artist, lyrics, genre
+            metas = Hyperparams(dict(artist=job['params']['artist'],
+                                     genre=job['params']['genre'],
+                                     lyrics=job['params']['lyrics'],
+                                     total_length=job['params']['length']*kw['sr'],  # remove hardcoded sr
+                                     offset=offset))
             print(hps)
             sample_hps = Hyperparams(dict(mode=mode,
                                           audio_file=audio_file,
@@ -256,8 +261,11 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             queue.update_status(cur, job_id, "upsampling_done")
             queue.closedb(db)
         else:
+            # pause the program for a minute and check back for new jobs
+            print('Zzz...')
+            time.sleep(60)
             # break the loop
-            break
+            # break
 
 if __name__ == '__main__':
     fire.Fire(run)
