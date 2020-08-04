@@ -221,6 +221,7 @@ def run(mode='ancestral', audio_file=None, prompt_length_in_seconds=12.0, port=2
             kw['n_samples'] = 3
             kw['hop_fraction'] = (0.5, 0.5, 0.25)
             kw['model'] = '5b_lyrics'
+            kw['levels'] = 3
             kw['sample_length_in_seconds'] = int(job['params']['length'])
             kw['total_sample_length_in_seconds'] = int(job['params']['length'])
             kw['n_samples'] = 15 if '5b_lyrics' == job['params']['model'] else 16
