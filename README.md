@@ -20,7 +20,7 @@ conda create --name jukebox python=3.7.5
 conda activate jukebox
 conda install mpi4py=3.0.3
 conda install pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch
-git clone https://github.com/openai/jukebox.git
+git clone https://github.com/zvk/jukebox.git
 cd jukebox
 pip install -r requirements.txt
 pip install -e .
